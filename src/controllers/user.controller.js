@@ -6,6 +6,10 @@ export const handleUserSignUp = async (req, res, next) => {
     console.log('회원가입 요청.');
     console.log("body: ", req.body);
     
-    const user = await userSignUp(bodyToUser(req.body));
-    res.status(StatusCodes.OK).json({result: user});
+    try{
+        const user = await userSignUp(bodyToUser(req.body));
+        res.status(StatusCodes.OK).json({result: user});
+    }catch(err){
+        res.status(StatusCodes.BAD_REQUEST).json({error: err.message});
+    }
 };

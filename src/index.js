@@ -7,7 +7,8 @@ import {
   handleNewReview
 } from "./controllers/shop.controller.js";
 import {
-  handleNewMission
+  handleNewMission,
+  handleAcceptMission
 } from "./controllers/mission.controller.js";
 
 import dotenv from "dotenv";
@@ -31,6 +32,7 @@ app.post("/user/signup", handleUserSignUp);
 app.post("/shop", handleNewShop);
 app.post("/shop/review", handleNewReview);
 app.post("/mission", handleNewMission);
+app.post("/mission/accept/:id", handleAcceptMission);
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
