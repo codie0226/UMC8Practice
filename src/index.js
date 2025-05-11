@@ -1,10 +1,14 @@
 import cors from "cors";
 import { 
-  handleUserSignUp, 
+  handleUserSignUp,
+  handleGetUserReview,
+  handleGetAcceptedUserMission,
+  handleCompleteUserMission
 } from "./controllers/user.controller.js";
 import { 
   handleNewShop,
-  handleNewReview
+  handleNewReview,
+  handleGetMissionByShopId
 } from "./controllers/shop.controller.js";
 import {
   handleNewMission,
@@ -33,6 +37,10 @@ app.post("/shop", handleNewShop);
 app.post("/shop/review", handleNewReview);
 app.post("/mission", handleNewMission);
 app.post("/mission/accept/:id", handleAcceptMission);
+app.get("/user/:id/review", handleGetUserReview);
+app.get("/shop/:id/mission", handleGetMissionByShopId);
+app.get("/user/:id/mission/ongoing", handleGetAcceptedUserMission);
+app.patch("/user/:id/mission/:mid/complete", handleCompleteUserMission);
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);

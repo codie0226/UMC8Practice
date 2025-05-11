@@ -9,10 +9,10 @@ export const bodyToShop = (body) => {
 
 export const responseFromShop = (shop) => {
     return {
-        shopName: shop.shop_name,
-        areaId: shop.area_id,
-        shopAddress: shop.shop_address,
-        shopCategory: shop.shop_category
+        shopName: shop.shopName,
+        areaId: shop.areaId,
+        shopAddress: shop.shopAddress,
+        shopCategory: shop.shopCategory
     }
 }
 
@@ -28,8 +28,8 @@ export const bodyToReview = (body) => {
 
 export const responseFromReview = (review) => {
     return{
-        reviewTitle: review.review_title,
-        reviewContent: review.review_content,
-        reviewStars: review.review_stars
+        reviewTitle: review.reviewTitle,
+        reviewContent: review.reviewContent,
+        reviewStars: review.reviewStars
     }
 }

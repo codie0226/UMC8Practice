@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import { bodyToShop, bodyToReview } from "../dtos/shop.dto.js";
-import { serviceNewShop, serviceNewReview } from "../services/shop.service.js";
+import { serviceNewShop, serviceNewReview, serviceGetMissionByShopId } from "../services/shop.service.js";
 
 export const handleNewShop = async (req, res, next) => {
     console.log("신규 상점 등록 API");
@@ -20,6 +20,18 @@ export const handleNewReview = async (req, res, next) => {
 
     try{
         const result = await serviceNewReview(bodyToReview(req.body));
+        res.status(StatusCodes.OK).json({result});
+    }catch(err){
+        res.status(StatusCodes.BAD_REQUEST).json({error: err.message});
+    }
+};
+
+export const handleGetMissionByShopId = async (req, res, next) => {
+    console.log("상점의 미션 조회 API");
+    console.log("ShopId: ", req.params.id);
+
+    try{
+        const result = await serviceGetMissionByShopId(parseInt(req.params.id));
         res.status(StatusCodes.OK).json({result});
     }catch(err){
         res.status(StatusCodes.BAD_REQUEST).json({error: err.message});

@@ -1,0 +1,118 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          Int      @id @default(autoincrement())
+  email       String   @unique(map: "email") @db.VarChar(30)
+  username    String   @db.VarChar(20)
+  gender      Int      @db.TinyInt
+  phoneNumber String   @unique(map: "phone_number") @db.VarChar(20)
+  point       Int
+  birth       DateTime @db.Timestamp()
+
+  UserFoodCategory UserFoodCategory[]
+  Review           Review[]
+  MissionLog       MissionLog[]
+
+  @@map("user")
+}
+
+model UserFoodCategory {
+  userId         Int          @map("user_id")
+  user           User         @relation(fields: [userId], references: [id])
+  foodCategoryId Int          @map("food_category_id")
+  foodCategory   FoodCategory @relation(fields: [foodCategoryId], references: [id])
+
+  @@unique([userId, foodCategoryId])
+  @@map("user_food_category")
+}
+
+model FoodCategory {
+  id   Int    @id @default(autoincrement())
+  food String @db.VarChar(10)
+
+  UserFoodCategory UserFoodCategory[]
+
+  @@map("food_category")
+}
+
+model Shop {
+  id           Int    @id @default(autoincrement())
+  shopName     String @map("shop_name") @db.VarChar(20)
+  shopAddress  String @map("shop_address") @db.VarChar(50)
+  shopCategory Int    @map("shop_category")
+  areaId       Int    @map("area_id")
+
+  area    Area         @relation(fields: [areaId], references: [id])
+  shopCat ShopCategory @relation(fields: [shopCategory], references: [id])
+
+  Review  Review[]
+  Mission Mission[]
+
+  @@map("shop")
+}
+
+model Area {
+  id       Int    @id @default(autoincrement())
+  areaName String @map("area_name") @db.VarChar(10)
+
+  shop Shop[]
+}
+
+model ShopCategory {
+  id       Int    @id @default(autoincrement())
+  category String @db.VarChar(10)
+
+  shop Shop[]
+}
+
+model Review {
+  id            Int    @id @default(autoincrement())
+  userId        Int    @map("user_id")
+  shopId        Int    @map("shop_id")
+  reviewTitle   String @map("review_title") @db.Text
+  reviewContent String @map("review_content") @db.Text
+  reviewStars   Int    @map("review_stars") @db.TinyInt
+
+  user User @relation(fields: [userId], references: [id])
+  shop Shop @relation(fields: [shopId], references: [id])
+
+  @@map("review")
+}
+
+model Mission {
+  id        Int      @id @default(autoincrement())
+  shopId    Int      @map("shop_id")
+  shop      Shop     @relation(fields: [shopId], references: [id])
+  content   String   @map("content") @db.Text
+  point     Int
+  createdAt DateTime @map("created_at") @db.Timestamp()
+  updatedAt DateTime @map("updated_at") @db.Timestamp()
+
+  MissionLog MissionLog[]
+
+  @@map("mission")
+}
+
+model MissionLog {
+  id        Int     @id @default(autoincrement())
+  missionId Int     @map("mission_id")
+  userId    Int     @map("user_id")
+  user      User    @relation(fields: [userId], references: [id])
+  mission   Mission @relation(fields: [missionId], references: [id])
+
+  @@map("mission_log")
+}

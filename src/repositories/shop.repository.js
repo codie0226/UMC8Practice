@@ -1,98 +1,98 @@
-import {pool} from "../db.config.js"
+import { prisma } from "../db.config.js";
 
 export const addShop = async (shopInfo) => {
-    const conn = await pool.getConnection();
-
     try{
-        const [confirm] = await pool.query(
-            `SELECT EXISTS(SELECT 1 FROM area WHERE id = ?) as isExistArea;`,
-            shopInfo.areaId
-        );
+        const areaExists = await prisma.area.findUnique({
+            where: { id: shopInfo.areaId },
+        });
 
-        if(!confirm[0].isExistArea){
+        if(!areaExists){
             return null;
         }
 
-        const [result] = await pool.query(
-            `INSERT INTO shop (shop_name, area_id, shop_address, shop_category) VALUES (?, ?, ?, ?);`,
-            [shopInfo.shopName, shopInfo.areaId, shopInfo.shopAddress, shopInfo.shopCategory]
-        );
+        const newShop = await prisma.shop.create({
+            data: {
+                shopName: shopInfo.shopName,         
+                areaId: shopInfo.areaId,             
+                shopAddress: shopInfo.shopAddress,   
+                shopCategory: shopInfo.shopCategory, 
+            },
+        });
 
-        return result.insertId;
+        return newShop.id;
     } catch(err){
         throw new Error(
             `오류 발생. (${err})`
         );
-    } finally{
-        conn.release();
     }
 };
 
 export const getShop = async (shopId) => {
-    const conn = await pool.getConnection();
-
     try{
-        const [shop] = await pool.query(`SELECT * FROM shop WHERE id = ?;`, shopId);
+        const shop = await prisma.shop.findUnique({
+            where: { id: parseInt(shopId) },
+        });
 
-        if(shop.length === 0){
-            return null;
-        }
-
-        return shop[0];
+        return shop; // findUnique returns the object or null
     } catch(err){
         throw new Error(
             `오류 발생. (${err})`
         );
-    } finally{
-        conn.release();
     }
 };
 
 export const addReview = async (reviewInfo) => {
-    const conn = await pool.getConnection();
-
     try{
-        const [confirm] = await pool.query(
-            `SELECT EXISTS(SELECT 1 FROM shop WHERE id = ?) as isExistShop;`,
-            reviewInfo.shopId
-        );
+        const shopExists = await prisma.shop.findUnique({
+            where: { id: reviewInfo.shopId },
+        });
 
-        if(!confirm[0].isExistShop){
+        if(!shopExists){
             return null;
         }
 
-        const [result] = await pool.query(
-            `INSERT INTO review (user_id, shop_id, review_title, review_content, review_stars) VALUES (?, ?, ?, ?, ?);`,
-            [reviewInfo.userId, reviewInfo.shopId, reviewInfo.reviewTitle, reviewInfo.reviewContent, reviewInfo.reviewStars]
-        );
+        const newReview = await prisma.review.create({
+            data: {
+                userId: reviewInfo.userId,                
+                shopId: reviewInfo.shopId,                
+                reviewTitle: reviewInfo.reviewTitle,      
+                reviewContent: reviewInfo.reviewContent,  
+                reviewStars: reviewInfo.reviewStars,      
+            },
+        });
 
-        return result.insertId;
+        return newReview.id;
     } catch(err){
         throw new Error(
             `오류 발생. (${err})`
         );
-    } finally{
-        conn.release();
     }
 };
 
 export const getReview = async (reviewId) => {
-    const conn = await pool.getConnection();
-
     try{
-        const [review] = await pool.query(`SELECT * FROM review WHERE id = ?;`, reviewId);
+        const review = await prisma.review.findUnique({
+            where: { id: parseInt(reviewId) },
+        });
 
-        if(review.length === 0){
-            return null;
-        }
-
-        return review[0];
+        return review;
     } catch(err){
         throw new Error(
             `오류 발생. (${err})`
         );
-    } finally{
-        conn.release();
     }
 }; 
 
+export const getMissionByShopId = async (shopId) => {
+    try{
+        const missions = await prisma.mission.findMany({
+            where: { shopId: shopId },
+        });
+
+        return missions
+    } catch(err){
+        throw new Error(
+            `오류 발생. (${err})`
+        );
+    }
+};

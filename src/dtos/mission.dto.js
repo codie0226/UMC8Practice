@@ -8,8 +8,8 @@ export const bodyToMission = (body) => {
 
 export const responseFromMission = (mission) => {
     return{
-        shopId: mission.shop_id,
-        shopName: mission.shop_name,
+        shopId: mission.shopId,
+        shopName: mission.shop.shopName,
         content: mission.content,
         point: mission.point
     }

@@ -7,7 +7,7 @@ export const bodyToUser = (body) => {
         gender: body.gender,
         birth,
         address: body.address || "",
-        phone_number: body.phone_number,
+        phoneNumber: body.phoneNumber,
         preferences: body.preferences
     };
 };
@@ -22,4 +22,19 @@ export const responseFromUser = (user, preference) => {
         phone_number: user.phone_number,
         preferences: preference.map((pref) => pref.food)
     }
+}
+
+
+export const responseFromMyReview = (reviews) => {
+    const result = reviews.map((review) => {
+        return {
+            id: review.id, 
+            shopId: review.shopId, 
+            reviewTitle: review.reviewTitle, 
+            reviewContent: review.reviewContent, 
+            reviewStars: review.reviewStars,
+            createdAt: review.createdAt.toDateString(), 
+            updatedAt: review.updatedAt
+        }});
+    return result;
 }

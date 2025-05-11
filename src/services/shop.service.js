@@ -2,7 +2,8 @@ import {
     addShop,
     getShop,
     addReview,
-    getReview
+    getReview,
+    getMissionByShopId
 } from "../repositories/shop.repository.js"
 
 import {
@@ -32,4 +33,14 @@ export const serviceNewReview = async (newReview) => {
     const newReviewInfo = await getReview(newReviewId);
 
     return responseFromReview(newReviewInfo);
+}
+
+export const serviceGetMissionByShopId = async (shopId) => {
+    const missions = await getMissionByShopId(shopId);
+
+    if(missions.length === 0){
+        throw new Error(`미션이 존재하지 않습니다. shopId: ${shopId}`);
+    }
+
+    return missions;
 }

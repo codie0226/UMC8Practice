@@ -1,91 +1,186 @@
-import {pool} from "../db.config.js"
+import { prisma } from "../db.config.js";
 
 export const addUser = async (data) => {
-    const conn = await pool.getConnection();
+    try {
+        const existingUser = await prisma.user.findUnique({
+            where: { email: data.email },
+        });
 
-    try{
-        const [confirm] = await pool.query(
-            `SELECT EXISTS(SELECT 1 FROM user WHERE email = ?) as isExistEmail;`,
-            data.email
-        );
-
-        if(confirm[0].isExistEmail){
+        if (existingUser) {
             return null;
         }
 
-        const [result] = await pool.query(
-            `INSERT INTO user (email, username, gender, birth, address, phone_number) VALUES (?, ?, ?, ?, ?, ?);`,
-            [data.email, data.name, data.gender, data.birth, data.address, data.phone_number]
-        );
+        const newUser = await prisma.user.create({
+            data: {
+                email: data.email,
+                address: data.address,
+                username: data.name,
+                gender: data.gender,
+                birth: data.birth,
+                phoneNumber: data.phoneNumber,
+            },
+        });
 
-        return result.insertId;
-    } catch(err){
+        return newUser.id;
+    } catch (err) {
         throw new Error(
             `오류 발생. (${err})`
         );
-    } finally{
-        conn.release();
     }
 };
 
 export const getUser = async (userId) => {
-    const conn = await pool.getConnection();
-  
     try {
-      const [user] = await pool.query(`SELECT * FROM user WHERE id = ?;`, userId);
-  
-      console.log(user);
-  
-      if (user.length == 0) {
-        return null;
-      }
-  
-      return user[0];
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+        });
+
+        console.log(user);
+
+        return user;
     } catch (err) {
-      throw new Error(
-        `오류가 발생했어요. 요청 파라미터를 확인해주세요. (${err})`
-      );
-    } finally {
-      conn.release();
+        throw new Error(
+            `오류가 발생했어요. 요청 파라미터를 확인해주세요. (${err})`
+        );
     }
 };
 
 export const setPreference = async (userId, foodCategoryId) => {
-    const conn = await pool.getConnection();
-  
     try {
-      await pool.query(
-        `INSERT INTO user_food_category (food_id, user_id) VALUES (?, ?);`,
-        [foodCategoryId, userId]
-      );
-  
-      return;
+        await prisma.userFoodCategory.create({
+            data: {
+                user: {
+                    connect: { id: parseInt(userId) }
+                },
+                foodCategory: { 
+                    connect: { id: parseInt(foodCategoryId) }
+                }
+            },
+        });
+        
+        return; 
     } catch (err) {
-      throw new Error(
-        `오류가 발생했어요. 요청 파라미터를 확인해주세요. (${err})`
-      );
-    } finally {
-      conn.release();
+        throw new Error(
+            `오류가 발생했어요. 요청 파라미터를 확인해주세요. (${err})`
+        );
     }
 };
 
 export const getUserPreferenceByUserId = async (userId) => {
-    const conn = await pool.getConnection();
-  
     try {
-      const [preferences] = await pool.query(
-        "SELECT ufc.food_id, ufc.user_id, fcl.food " +
-          "FROM user_food_category ufc JOIN food_category fcl on ufc.food_id = fcl.id " +
-          "WHERE ufc.user_id = ? ORDER BY ufc.food_id ASC;",
-        userId
-      );
-  
-      return preferences;
+        const preferences = await prisma.userFoodCategory.findMany({
+            where: { userId: parseInt(userId) },
+            include: {
+                foodCategory: { 
+                    select: {
+                        food: true,
+                    },
+                },
+            },
+            orderBy: {
+                foodCategoryId: 'asc',
+            },
+        });
+
+        return preferences.map(p => ({
+            food_id: p.foodId,
+            user_id: p.userId,
+            food: p.foodCategory.food
+        }));
     } catch (err) {
-      throw new Error(
-        `오류가 발생했어요. 요청 파라미터를 확인해주세요. (${err})`
-      );
-    } finally {
-      conn.release();
+        throw new Error(
+            `오류가 발생했어요. 요청 파라미터를 확인해주세요. (${err})`
+        );
     }
 };
+
+export const getUserReviewById = async (userId) => {
+    try {
+        const reviews = await prisma.review.findMany({
+            where: { userId: userId },
+        });
+
+        console.log(reviews);
+
+        return reviews;    
+    } catch (err) {
+        throw new Error(
+            `오류가 발생했어요. 요청 파라미터를 확인해주세요. (${err})`
+        );
+    }
+}
+
+export const getUserMissionById = async (userId) => {
+    try {
+        const missions = await prisma.mission.findMany({
+            where: { userId: userId },
+        });
+
+        console.log(missions);
+
+        return missions;    
+    }catch (err) {
+        throw new Error(
+            `오류가 발생했어요. 요청 파라미터를 확인해주세요. (${err})`
+        );
+    }
+}
+
+export const getAcceptedUserMission = async (userId) => {
+    try{
+        const missions = await prisma.missionLog.findMany({
+            where: { userId: userId, success: 0 },
+            include: {
+                mission: {
+                    select: {
+                        content: true,
+                        point: true,
+                        shop: {
+                            select: {
+                                shopName: true,
+                            }
+                        }
+                    }
+                },
+            },
+            orderBy: {
+                missionId: 'asc',
+            },
+        });
+
+        console.log(missions);
+
+        return missions;
+    }catch(err){
+        throw new Error(
+            `오류가 발생했어요. 요청 파라미터를 확인해주세요. (${err})`
+        );
+    }
+}
+
+export const completeUserMission = async (userId, missionId) => {
+    try{
+        const missionExists = await prisma.missionLog.findUnique({
+            where: { missionId_userId: { missionId: missionId, userId: userId } },
+        });
+
+        if(missionExists === null){
+            throw new Error(`해당 미션이 수락된 목록에 없습니다. ${missionId}`);
+        }
+
+        const mission = await prisma.missionLog.update({
+            where: {
+                missionId_userId: { missionId: missionId, userId: userId }
+            },
+            data: {
+                success: 1,
+            }
+        })
+
+        return mission;
+    }catch(err){
+        throw new Error(
+            `오류가 발생했어요. 요청 파라미터를 확인해주세요. (${err})`
+        );
+    }
+}
