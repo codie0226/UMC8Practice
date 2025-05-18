@@ -13,9 +13,9 @@ export const handleNewMission = async(req, res, next) => {
 
     try{
         const result = await serviceNewMission(bodyToMission(req.body));
-        res.status(StatusCodes.OK).json({result});
+        res.status(StatusCodes.OK).success(result);
     }catch(err){
-        res.status(StatusCodes.BAD_REQUEST).json({error: err.message});
+        next(err);
     }
 };
 
@@ -25,8 +25,8 @@ export const handleAcceptMission = async(req, res, next) => {
 
     try{
         await serviceAcceptMission(req.params.id, 1);
-        res.status(StatusCodes.OK).json({result: "success"});
+        res.status(StatusCodes.OK).success("success");
     }catch(err){
-        res.status(StatusCodes.BAD_REQUEST).json({error: err.message});
+        next(err);
     }
 };

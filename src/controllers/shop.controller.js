@@ -8,9 +8,9 @@ export const handleNewShop = async (req, res, next) => {
 
     try{
         const result = await serviceNewShop(bodyToShop(req.body));
-        res.status(StatusCodes.OK).json({result});
+        res.status(StatusCodes.OK).success(result);
     }catch(err){
-        res.status(StatusCodes.BAD_REQUEST).json({error: err.message});
+        next(err);
     }
 };
 
@@ -20,9 +20,9 @@ export const handleNewReview = async (req, res, next) => {
 
     try{
         const result = await serviceNewReview(bodyToReview(req.body));
-        res.status(StatusCodes.OK).json({result});
+        res.status(StatusCodes.OK).success(result);
     }catch(err){
-        res.status(StatusCodes.BAD_REQUEST).json({error: err.message});
+        next(err);
     }
 };
 
@@ -32,8 +32,8 @@ export const handleGetMissionByShopId = async (req, res, next) => {
 
     try{
         const result = await serviceGetMissionByShopId(parseInt(req.params.id));
-        res.status(StatusCodes.OK).json({result});
+        res.status(StatusCodes.OK).success(result);
     }catch(err){
-        res.status(StatusCodes.BAD_REQUEST).json({error: err.message});
+        next(err);
     }
 };
