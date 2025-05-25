@@ -19,6 +19,9 @@ import dotenv from "dotenv";
 import compression from "compression";
 import express from "express";          // -> ES Module
 
+import swaggerAutogen from "swagger-autogen";
+import swaggerUiExpress from "swagger-ui-express";
+
 dotenv.config();
 
 const app = express();
@@ -32,6 +35,51 @@ app.use(compression({
   level: 6,
   threshold: 512
 }));
+
+app.use(
+  "/docs",
+  swaggerUiExpress.serve,
+  swaggerUiExpress.setup({}, {
+    swaggerOptions: {
+      url: "/openapi.json",
+    },
+  })
+);
+
+app.get("/openapi.json", async (req, res, next) => {
+  // #swagger.ignore = true
+  const options = {
+    openapi: "3.0.0",
+    disableLogs: true,
+    writeOutputFile: false,
+  };
+  const outputFile = "/dev/null"; // 파일 출력은 사용하지 않습니다.
+  const routes = ["./src/index.js", "./swagger.js"];
+  const doc = {
+    info: {
+      title: "UMC 8th",
+      description: "UMC 8th Node.js 테스트 프로젝트입니다.",
+    },
+    host: "localhost:3000",
+
+    components: {
+        schemas: {
+            err500: {
+                resultType: 'error',
+                error: {
+                  errorCode: 'E001',
+                  reason: 'Internal Server Error',
+                  data: null
+                },
+                result: null
+            }
+        }
+    }
+  };
+
+  const result = await swaggerAutogen(options)(outputFile, routes, doc);
+  res.json(result ? result.data : null);
+});
 
 app.get('/', (req, res) => {
   const str = 'teststeststsdaragsrsaeasdgajigajwgawgonrogniwegnowegnawg';

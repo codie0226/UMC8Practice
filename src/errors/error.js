@@ -16,5 +16,38 @@ export class NoDataFoundError extends Error{
         super(reason);
         this.reason = reason || '데이터를 찾을 수 없습니다.';
         this.data = data;
+        this.statusCode = StatusCodes.NOT_FOUND;
+    }
+}
+
+export class NoShopFoundError extends Error{
+    errorCode = 'E003';
+
+    constructor(reason, data){
+        super(reason);
+        this.reason = reason || '상점을 찾을 수 없습니다.';
+        this.data = data;
+        this.statusCode = StatusCodes.NOT_FOUND;
+    }
+}
+
+export class AreaNotFoundError extends Error{
+    errorCode = 'E004';
+
+    constructor(reason, data){
+        super(reason);
+        this.reason = reason || '지역을 찾을 수 없습니다.';
+        this.data = data;
+        this.statusCode = StatusCodes.NOT_FOUND;
+    }
+}
+
+export class MissionNotFoundError extends Error{
+    errorCode = 'E005';
+    constructor(reason, data){
+        super(reason);
+        this.reason = reason || '미션을 찾을 수 없습니다.';
+        this.data = data;
+        this.statusCode = StatusCodes.NOT_FOUND;
     }
 }
